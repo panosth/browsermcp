@@ -30,6 +30,8 @@ const snapshotTools: Tool[] = [
   common.navigate(true),
   common.goBack(true),
   common.goForward(true),
+  common.scrollUp(true),
+  common.scrollDown(true),
   snapshot.snapshot,
   snapshot.click,
   snapshot.hover,

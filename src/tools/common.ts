@@ -1,3 +1,4 @@
+import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 
 import {
@@ -5,6 +6,8 @@ import {
   GoForwardTool,
   NavigateTool,
   PressKeyTool,
+  ScrollDownTool,
+  ScrollUpTool,
   WaitTool,
 } from "@repo/types/mcp/tool";
 
@@ -29,6 +32,55 @@ export const navigate: ToolFactory = (snapshot) => ({
         {
           type: "text",
           text: `Navigated to ${url}`,
+        },
+      ],
+    };
+  },
+});
+
+const scrollArguments = z.object({
+  percentage: z
+    .number()
+    .min(0, { message: "percentage must be between 0 and 100" })
+    .max(100, { message: "percentage must be between 0 and 100" })
+    .describe(
+      "Percentage of the page height to scroll. 100 scrolls a full page; 50 scrolls half a page.",
+    ),
+});
+
+type ScrollToolShape = typeof ScrollUpTool.shape;
+
+const createScrollTool: (
+  shape: ScrollToolShape,
+  direction: "up" | "down",
+) => ToolFactory = (shape, direction) => (snapshot) => ({
+  schema: {
+    name: shape.name.value,
+    description: shape.description.value,
+    inputSchema: zodToJsonSchema(scrollArguments),
+  },
+  handle: async (context, params) => {
+    const validatedParams = scrollArguments.parse(params);
+    await context.sendSocketMessage(`browser_scroll_${direction}`, validatedParams);
+
+    if (snapshot) {
+      const ariaSnapshot = await captureAriaSnapshot(context);
+      return {
+        content: [
+          {
+            type: "text",
+            text: `Scrolled ${direction} ${validatedParams.percentage}% of the page`,
+          },
+          ...ariaSnapshot.content,
+        ],
+      };
+    }
+
+    return {
+      content: [
+        {
+          type: "text",
+          text: `Scrolled ${direction} ${validatedParams.percentage}% of the page`,
         },
       ],
     };
@@ -78,6 +130,13 @@ export const goForward: ToolFactory = (snapshot) => ({
     };
   },
 });
+
+export const scrollUp: ToolFactory = createScrollTool(ScrollUpTool.shape, "up");
+
+export const scrollDown: ToolFactory = createScrollTool(
+  ScrollDownTool.shape,
+  "down",
+);
 
 export const wait: Tool = {
   schema: {
