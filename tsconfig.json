@@ -5,6 +5,7 @@
     "moduleResolution": "bundler",
     "strict": true,
     "esModuleInterop": true,
+    "typeRoots": ["./src/types"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,

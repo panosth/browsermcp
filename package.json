@@ -32,6 +32,7 @@
     "@repo/messaging": "workspace:*",
     "@repo/types": "workspace:*",
     "@repo/utils": "workspace:*",
+    "@types/node": "^22.10.2",
     "@types/ws": "^8.18.0",
     "shx": "^0.3.4",
     "tsup": "^8.4.0",

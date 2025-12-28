@@ -10,6 +10,7 @@ import { Context } from "@/context";
 import type { Resource } from "@/resources/resource";
 import type { Tool } from "@/tools/tool";
 import { createWebSocketServer } from "@/ws";
+import { debugLog } from "@/utils/log";
 
 type Options = {
   name: string;
@@ -32,10 +33,11 @@ export async function createServerWithTools(options: Options): Promise<Server> {
   );
 
   const wss = await createWebSocketServer();
+  wss.on("error", debugLog);
   wss.on("connection", (websocket) => {
     // Close any existing connections
     if (context.hasWs()) {
-      context.ws.close();
+      context.close();
     }
     context.ws = websocket;
   });
@@ -78,12 +80,18 @@ export async function createServerWithTools(options: Options): Promise<Server> {
       return { contents: [] };
     }
 
-    const contents = await resource.read(context, request.params.uri);
-    return { contents };
+    try {
+      const contents = await resource.read(context, request.params.uri);
+      return { contents };
+    } catch (error) {
+      debugLog("Failed to read resource", error);
+      return { contents: [] };
+    }
   });
 
+  const originalClose = server.close.bind(server);
   server.close = async () => {
-    await server.close();
+    await originalClose();
     await wss.close();
     await context.close();
   };
