@@ -38,6 +38,8 @@ declare module "@repo/types/mcp/tool" {
   export const HoverTool: typeof NavigateTool;
   export const TypeTool: typeof NavigateTool;
   export const SelectOptionTool: typeof NavigateTool;
+  export const ScrollUpTool: typeof NavigateTool;
+  export const ScrollDownTool: typeof NavigateTool;
   export const SnapshotTool: typeof NavigateTool;
   export const GetConsoleLogsTool: typeof NavigateTool;
   export const ScreenshotTool: typeof NavigateTool;
